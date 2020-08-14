@@ -27,14 +27,14 @@ def execute():
   rospy.init_node('jetracer_traine_view', anonymous=False)
 
   # Folder search
-  files = glob.glob('data/*')
+  files = glob.glob('data/apex/*')
   files_num = len(files)
 
   # dict
   file_dict = dict()
   for f in files:
-    pos = re.findall(r'\d+', f)
-    file_dict[f] = (int(pos[1]), int(pos[2]))
+    pos = re.findall(r'\d+', f)    
+    file_dict[f] = (int(pos[0]), int(pos[1]))
 
   # OpenCV
   cv2.namedWindow('JETRACER_TRAINE_VIEW', cv2.WINDOW_NORMAL)
@@ -87,9 +87,9 @@ def execute():
   # rename
   for f in file_dict:
     pos = file_dict[f]
-    
-    f_new = re.sub('_[0-9]_[0-9].bmp', 
-            '_{}_{}.bmp'.format(pos[0], pos[1]), f)
+
+    f_new = re.sub('[0-9]_[0-9]_', 
+            '{}_{}_'.format(pos[0], pos[1]), f)
 
     os.rename(f, f_new)
 
