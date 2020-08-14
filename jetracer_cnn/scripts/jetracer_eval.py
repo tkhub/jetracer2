@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 import rospy
+from sensor_msgs.msg import Image
+
+import cv2
+from cv_bridge import CvBridge
 
 import torch
 import torchvision
@@ -10,10 +14,23 @@ from xy_dataset import XYDataset
 import torchvision.transforms as transforms
 
 
+save_image = None
+
+
+def imageSubscribe(data):  
+  global save_image
+
+  save_image = data
+
+
 def execute():
   
   # ROS initialize
   rospy.init_node('jetracer_lerning')
+
+  image_topic = '/camera/color/image_raw'
+  image_sub = rospy.Subscriber(image_topic, Image, imageSubscribe)
+
 
   # Transform
   trans = transforms.Compose([
@@ -22,61 +39,44 @@ def execute():
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
   ])
+
+
   # Dataset
   dataset = XYDataset('data/', ['apex'], trans, random_hflip=True)
   dataset.refresh()  
 
+
   # torch
   device = torch.device('cuda')
 
+  # model
   model = torchvision.models.resnet18(pretrained=True)
   model.fc = torch.nn.Linear(512, 2)
-
+  model.load_state_dict(torch.load('data/model'))  
   model = model.to(device)
+  # model = model.eval()
 
-  optimizer = torch.optim.Adam(model.parameters())
+  cv_bridge = CvBridge()
 
-  try:
-    train_loader = torch.utils.data.DataLoader(
-      dataset,
-      batch_size=8,
-      shuffle=True
-    )
+  # window
 
-    model = model.train()
+  cv2.namedWindow('JETRACER_EVAL_VIEW', cv2.WINDOW_NORMAL)
 
-    for i in range(5):
-      j = 0
-      sum_loss = 0.0
-      error_count = 0.0
+  while not rospy.is_shutdown():
 
-      for images, category_idx, xy in iter(train_loader):
-        print(xy)
-        images = images.to(device)
-        xy = xy.to(device)
+    if save_image is not None:
+      cv_image = cv_bridge.imgmsg_to_cv2(save_image, desired_encoding="bgr8")
 
-        optimizer.zero_grad()
+      preprocessed = preprocess(cv_image)
+      output = model(preprocessed).detach().cpu().numpy().flatten()
 
-        outputs = model(images)
+      x = int(cv_image.shape[1] * (output[0]/2.0+0.5))
+      y = int(cv_image.shape[0] * (output[1]/2.0+0.5))
 
-        loss = 0.0
+      cv_image = cv2.circle(cv_image, (x, y), 8, (255, 0, 0), 3)
 
-        for batch_idx, cat_idx in enumerate(list(category_idx.flatten())):
-          loss += torch.mean((outputs[batch_idx][2 * cat_idx:2 * cat_idx+2] - xy[batch_idx])**2)
-
-        loss /= len(category_idx)
-
-        loss.backward()
-        optimizer.step()
-
-        count = len(category_idx.flatten())
-        j += count
-        sum_loss += float(loss)
-
-        print('[{}, {}]'.format(j, sum_loss))
-
-  except e:
-    print(e)
+      cv2.imshow('JETRACER_EVAL_VIEW', cv_image)
+      cv2.waitKey(30)      
 
 
 if __name__ == '__main__':

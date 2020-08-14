@@ -3,7 +3,6 @@
 import sys
 
 import rospy
-import rospkg
 from sensor_msgs.msg import Image
 
 import cv2
@@ -11,6 +10,7 @@ from cv_bridge import CvBridge
 
 from xy_dataset import XYDataset
 import torchvision.transforms as transforms
+
 
 save_image = None
 
@@ -26,7 +26,7 @@ def execute():
   rospy.init_node('jetracer_traine', anonymous=False)
 
   # ROS parameters
-  save_rate = 1.0
+  save_rate = 5.0
   image_topic = '/camera/color/image_raw'
   try:
     save_rate = rospy.get_param('~save_rate')

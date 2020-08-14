@@ -48,10 +48,10 @@ def execute():
   while not rospy.is_shutdown():
 
     # key function
-    key = cv2.waitKey(30)
-    if key == 83: # NEXT: ->
+    key = cv2.waitKey(30)    
+    if key == 50: # NEXT: ->
       disp_count = disp_count + 1
-    if key == 81: # PREV: <- 
+    if key == 49: # PREV: <- 
       disp_count = disp_count -1
 
     if disp_count < 0:
@@ -59,9 +59,12 @@ def execute():
     if disp_count >= files_num:
       disp_count = files_num - 1
 
-    if key == 83 or key == 81:
+    if key == 49 or key == 50:
       disp_image = cv2.imread(files[disp_count], cv2.IMREAD_COLOR)
       disp_pos = file_dict[files[disp_count]]
+
+    if key == 27:
+      break
 
     if mouse_event == cv2.EVENT_LBUTTONDOWN:
       disp_pos = mouse_pos
@@ -74,12 +77,12 @@ def execute():
     cv2.line(temp, (0, mouse_pos[1]), (temp.shape[1], mouse_pos[1]),
               (255, 0, 0), thickness=1, lineType=cv2.LINE_8)
     cv2.circle(temp, disp_pos, 5, (0, 255, 0), thickness=3)
-    cv2.putText(temp, "PREV <- -> NEXT", 
+    cv2.putText(temp, "PREV: 1 <-> 2 :NEXT", 
                 (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
-                0.6, (255, 255, 255))
+                0.6, (255, 255, 255), 2)
     cv2.putText(temp, files[disp_count],
                 (10, temp.shape[0]-10), cv2.FONT_HERSHEY_SIMPLEX,
-                0.6, (255, 255, 255))
+                0.6, (255, 255, 255), 2)
 
     # display
     cv2.imshow('JETRACER_TRAINE_VIEW', temp)
@@ -87,9 +90,11 @@ def execute():
   # rename
   for f in file_dict:
     pos = file_dict[f]
-
+    
     f_new = re.sub('[0-9]_[0-9]_', 
             '{}_{}_'.format(pos[0], pos[1]), f)
+
+    print(f_new)            
 
     os.rename(f, f_new)
 

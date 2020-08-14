@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>jetracer_traine</name>
+  <name>jetracer_cnn</name>
   <version>0.0.0</version>
   <description>The jetracer_traine package</description>
 
