@@ -120,6 +120,7 @@ def execute():
 
   # モデルを保存する
   torch.save(model.state_dict(), 'data/model.pth')
+  model = model.eval()
 
   # ------------------------------------------#
   # DataLoader: データセットからサンプルを抽出する
