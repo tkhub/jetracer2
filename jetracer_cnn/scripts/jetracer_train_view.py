@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rospy
+# import rospy
 
 import os
 import re
@@ -24,7 +24,7 @@ def execute():
   global mouse_event
 
   # ROS initialize
-  rospy.init_node('jetracer_traine_view', anonymous=False)
+  # rospy.init_node('jetracer_traine_view', anonymous=False)
 
   # Folder search
   files = glob.glob('data/apex/*')
@@ -45,12 +45,15 @@ def execute():
   disp_pos = file_dict[files[0]]
 
   # Loop
-  while not rospy.is_shutdown():
+  # while not rospy.is_shutdown():
+  while True:
 
     # key function
     key = cv2.waitKey(30)    
+    # "1"key
     if key == 50: # NEXT: ->
       disp_count = disp_count + 1
+    # "2" key
     if key == 49: # PREV: <- 
       disp_count = disp_count -1
 
@@ -59,16 +62,22 @@ def execute():
     if disp_count >= files_num:
       disp_count = files_num - 1
 
+    # "1" key or "2" key 画像リロード
     if key == 49 or key == 50:
       disp_image = cv2.imread(files[disp_count], cv2.IMREAD_COLOR)
       disp_pos = file_dict[files[disp_count]]
 
+    # ESCでbreak
     if key == 27:
       break
-
     if mouse_event == cv2.EVENT_LBUTTONDOWN:
       disp_pos = mouse_pos
       file_dict[files[disp_count]] = mouse_pos
+      if lblatch == 1:
+        lblatch = 0
+        disp_count = disp_count + 1
+    else:
+      lblatch = 0
 
     # display art
     temp = disp_image.copy()
@@ -100,11 +109,12 @@ def execute():
 
 if __name__ == '__main__':
 
-  try:
-    execute()
-  except rospy.ROSInterruptException as ex:
-    rospy.logerr(ex)
-  except KeyboardInterrupt:
-    pass
-  except Exception as ex:
-    rospy.logerr(ex)
+  execute()
+  #try
+  #  execute()
+  # except rospy.ROSInterruptException as ex:
+  #  rospy.logerr(ex)
+  # except KeyboardInterrupt:
+  #  pass
+  # except Exception as ex:
+  #  rospy.logerr(ex)
