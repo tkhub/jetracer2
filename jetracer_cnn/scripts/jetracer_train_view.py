@@ -43,6 +43,7 @@ def execute():
   disp_count = 0
   disp_image = cv2.imread(files[disp_count], cv2.IMREAD_COLOR)
   disp_pos = file_dict[files[0]]
+  lblatch = 0
 
   # Loop
   # while not rospy.is_shutdown():
