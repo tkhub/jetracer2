@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# import rospy
 
 import os
 import re
@@ -23,8 +22,6 @@ def execute():
   global mouse_pos
   global mouse_event
 
-  # ROS initialize
-  # rospy.init_node('jetracer_traine_view', anonymous=False)
 
   # Folder search
   files = glob.glob('data/apex/*')
@@ -57,6 +54,9 @@ def execute():
     # "2" key
     if key == 49: # PREV: <- 
       disp_count = disp_count -1
+    # "del" key
+    if key == 65535:
+      pass
 
     if disp_count < 0:
       disp_count = 0
@@ -87,7 +87,7 @@ def execute():
     cv2.line(temp, (0, mouse_pos[1]), (temp.shape[1], mouse_pos[1]),
               (255, 0, 0), thickness=1, lineType=cv2.LINE_8)
     cv2.circle(temp, disp_pos, 5, (0, 255, 0), thickness=3)
-    cv2.putText(temp, "PREV: 1 <-> 2 :NEXT", 
+    cv2.putText(temp, "PREV: 1 <- Del -> 2 :NEXT", 
                 (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
                 0.6, (255, 255, 255), 2)
     cv2.putText(temp, files[disp_count],
