@@ -5,7 +5,10 @@ import Jetson.GPIO as GPIO
 import uuid
 import time
 
+# 録画状態状態遷移用変数
 recst = "recpre"
+
+# 録画状態状態遷移用関数(イベント)
 def btn_th(self):
     global recst
     recst_bf = recst
@@ -16,6 +19,7 @@ def btn_th(self):
     else:
         recst = "recgo"
 
+# 録画用ループ関数
 def recloop(camera, filepath, intv):
     global recst
     while recst == "recgo":
@@ -24,9 +28,10 @@ def recloop(camera, filepath, intv):
         cv2.imwrite(filename, img)
         time.sleep(intv)
 
+# 録画開始待関数
 def waitrec():
     global recst
-    while recst == "recpre":
+    while recst == "recpre"
         pass
 
 def execute():
