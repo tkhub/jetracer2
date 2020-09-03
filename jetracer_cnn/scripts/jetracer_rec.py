@@ -31,7 +31,7 @@ def recloop(camera, filepath, intv):
 # 録画開始待関数
 def waitrec():
     global recst
-    while recst == "recpre"
+    while recst == "recpre":
         pass
 
 def execute():
