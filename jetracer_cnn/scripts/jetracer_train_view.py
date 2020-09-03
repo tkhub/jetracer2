@@ -54,19 +54,18 @@ def execute():
     # "2" key
     if key == 49: # PREV: <- 
       disp_count = disp_count -1
-    # "del" key
-    if key == 65535:
-      pass
 
     if disp_count < 0:
       disp_count = 0
     if disp_count >= files_num:
-      disp_count = files_num - 1
+      #disp_count = files_num - 1
+      break
 
     # "1" key or "2" key 画像リロード
     if key == 49 or key == 50:
       disp_image = cv2.imread(files[disp_count], cv2.IMREAD_COLOR)
       disp_pos = file_dict[files[disp_count]]
+
 
     # ESCでbreak
     if key == 27:
@@ -74,11 +73,6 @@ def execute():
     if mouse_event == cv2.EVENT_LBUTTONDOWN:
       disp_pos = mouse_pos
       file_dict[files[disp_count]] = mouse_pos
-      if lblatch == 1:
-        lblatch = 0
-        disp_count = disp_count + 1
-    else:
-      lblatch = 0
 
     # display art
     temp = disp_image.copy()
@@ -93,7 +87,6 @@ def execute():
     cv2.putText(temp, files[disp_count],
                 (10, temp.shape[0]-10), cv2.FONT_HERSHEY_SIMPLEX,
                 0.6, (255, 255, 255), 2)
-
     # display
     cv2.imshow('JETRACER_TRAINE_VIEW', temp)
 
