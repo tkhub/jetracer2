@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import rospy
+#import rospy
 
 import torch
 import torchvision
@@ -35,10 +35,10 @@ def execute():
   # Dataset
   dataset = XYDataset('data/', ['apex'], trans, random_hflip=True)  
 
-  rospy.loginfo('* Dataset load.')  
-  rospy.loginfo('   directory : {}'.format(dataset.directory))
-  rospy.loginfo('   category  : {}'.format(dataset.categories))
-  rospy.loginfo('   data count: {}'.format(len(dataset.annotations)))
+#  rospy.loginfo('* Dataset load.')  
+#  rospy.loginfo('   directory : {}'.format(dataset.directory))
+#  rospy.loginfo('   category  : {}'.format(dataset.categories))
+#  rospy.loginfo('   data count: {}'.format(len(dataset.annotations)))
 
   # Device
   device_name = 'cpu'
@@ -48,9 +48,9 @@ def execute():
     device_name = 'cpu'
   device = torch.device(device_name)
 
-  rospy.loginfo('* Device load.')
-  rospy.loginfo('   index: {}'.format(device.index))
-  rospy.loginfo('   type : {}'.format(device.type))
+#  rospy.loginfo('* Device load.')
+#  rospy.loginfo('   index: {}'.format(device.index))
+#  rospy.loginfo('   type : {}'.format(device.type))
   
   # Model
   model = torchvision.models.resnet18(pretrained=True)
@@ -70,7 +70,7 @@ def execute():
   # Training: 準備したデータローダで学習開始
   model.train()
 
-  epoch_count = 100
+  epoch_count = 10
 
   while epoch_count > 0:
 
@@ -159,14 +159,15 @@ def execute():
 
 if __name__ == '__main__':
 
-  try:
-    execute()
-  except rospy.ROSInterruptException as ex:
-    rospy.logerr(ex)
-  except KeyboardInterrupt:
-    print("interrupt signal...")
-  except Exception as ex:
-    rospy.logerr(ex)
-  except:
-    pass
+  execute()
+#  try:
+#    execute()
+#  except rospy.ROSInterruptException as ex:
+#    rospy.logerr(ex)
+#  except KeyboardInterrupt:
+#    print("interrupt signal...")
+#  except Exception as ex:
+#    rospy.logerr(ex)
+#  except:
+#    pass
 
