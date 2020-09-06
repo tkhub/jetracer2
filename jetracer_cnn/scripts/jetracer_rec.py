@@ -8,6 +8,10 @@ import time
 # 録画状態状態遷移用変数
 recst = "recpre"
 
+# 録画ボタンport
+recbtn = 31
+gobtn = 35
+
 # 録画状態状態遷移用関数(イベント)
 def btn_th(self):
     global recst
@@ -28,6 +32,16 @@ def recloop(camera, filepath, intv):
         cv2.imwrite(filename, img)
         time.sleep(intv)
 
+def testloop():
+    global recst
+    cnt = 0
+    while recst == "recgo":
+        print("loop")
+        time.sleep(1)
+        cnt = cnt + 1
+        if cnt > 10:
+            break
+
 # 録画開始待関数
 def waitrec():
     global recst
@@ -36,17 +50,19 @@ def waitrec():
 
 def execute():
     global recst
+    global recbtn
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(21, GPIO.IN)
-    GPIO.add_event_detect(21,GPIO.FALLING, callback=btn_th, bouncetime=200)
+    GPIO.setup(recbtn, GPIO.IN)
+    GPIO.add_event_detect(recbtn,GPIO.FALLING, callback=btn_th, bouncetime=200)
 
-    camera0 = nano.Camera(flip=2, width=224, height=224, fps=30)
+    camera0 = nano.Camera(device_id=0, flip=2, width=224, height=224, fps=30)
     # wait rec button
     print("REC wait ...")
     waitrec()
     # rec start
     print("REC START! ...")
     recloop(camera0, "./data/apex/", 0.1)
+    # testloop()
     print("REC END!! ...")
     camera0.release()
     # finish
