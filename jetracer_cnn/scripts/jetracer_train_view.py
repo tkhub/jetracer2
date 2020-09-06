@@ -5,10 +5,14 @@ import os
 import re
 import glob
 import cv2
+import time
 
 
 mouse_pos = (0, 0)
 mouse_event = 0
+nextkeycode = 50
+backkeycode = 49
+delkeycode = 100
 
 def mouse_callback(event, x, y, flags, param):
   global mouse_pos
@@ -49,22 +53,25 @@ def execute():
     # key function
     key = cv2.waitKey(30)    
     # "1"key
-    if key == 50: # NEXT: ->
+    if key == nextkeycode: # NEXT: ->
       disp_count = disp_count + 1
     # "2" key
-    if key == 49: # PREV: <- 
+    if key == backkeycode: # PREV: <- 
       disp_count = disp_count -1
 
     if disp_count < 0:
       disp_count = 0
     if disp_count >= files_num:
-      #disp_count = files_num - 1
       break
 
     # "1" key or "2" key 画像リロード
-    if key == 49 or key == 50:
+    if key == nextkeycode or key == backkeycode:
+      # 次 or 前のdisp_countを表示
       disp_image = cv2.imread(files[disp_count], cv2.IMREAD_COLOR)
       disp_pos = file_dict[files[disp_count]]
+
+
+
 
 
     # ESCでbreak
@@ -87,8 +94,20 @@ def execute():
     cv2.putText(temp, files[disp_count],
                 (10, temp.shape[0]-10), cv2.FONT_HERSHEY_SIMPLEX,
                 0.6, (255, 255, 255), 2)
-    # display
-    cv2.imshow('JETRACER_TRAINE_VIEW', temp)
+    if key == delkeycode:
+      cv2.line(temp, (0, 0), (temp.shape[0], temp.shape[1]),
+                (255, 0, 0), thickness=1, lineType=cv2.LINE_8)
+      cv2.line(temp, (temp.shape[0], 0), (0, temp.shape[1]),
+                (255, 0, 0), thickness=1, lineType=cv2.LINE_8)# display
+      
+      cv2.imshow('JETRACER_TRAINE_VIEW', temp)
+      time.sleep(1)
+#     消すならそれなりの処理をしないとファイルが有るはずなのに見つからなくなる。dicから消すとか
+      
+#      os.remove(files[disp_count])
+
+    else:
+      cv2.imshow('JETRACER_TRAINE_VIEW', temp)
 
   # rename
   for f in file_dict:
