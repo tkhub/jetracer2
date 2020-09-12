@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# カメラを見せて学習結果の評価
 
 import rospy
 from sensor_msgs.msg import Image

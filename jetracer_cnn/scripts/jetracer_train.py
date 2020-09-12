@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# 録画
 
 import sys
 
