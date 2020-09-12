@@ -83,9 +83,13 @@ def execute():
     # ESCでbreak
     if key == 27:
       break
-    if mouse_event == cv2.EVENT_LBUTTONDOWN:
+    if mouse_event == cv2.EVENT_LBUTTONDOWN and not delflg:
       disp_pos = mouse_pos
       file_dict[files[disp_count]] = mouse_pos
+    #elif delflg:
+      #disp_pos = (-1, -1)
+      #file_dict[files[disp_count]] = disp_pos
+
 
     # display art
     temp = disp_image.copy()
@@ -118,13 +122,14 @@ def execute():
   # rename
   for f in file_dict:
     pos = file_dict[f]
-    
-    f_new = re.sub('[0-9]_[0-9]_', 
-            '{}_{}_'.format(pos[0], pos[1]), f)
-
-    print(f_new)            
-
-    os.rename(f, f_new)
+    if pos[0]  == 0 and pos[1] == 0:
+      print("del:" + f)
+      os.remove(f) 
+    else:
+      f_new = re.sub(r'-?[0-9]_-?[0-9]_', 
+              '{}_{}_'.format(pos[0], pos[1]), f)
+      print(f_new)            
+      os.rename(f, f_new)
 
 if __name__ == '__main__':
 
