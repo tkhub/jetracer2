@@ -86,9 +86,9 @@ def execute():
     if mouse_event == cv2.EVENT_LBUTTONDOWN and not delflg:
       disp_pos = mouse_pos
       file_dict[files[disp_count]] = mouse_pos
-    #elif delflg:
-      #disp_pos = (-1, -1)
-      #file_dict[files[disp_count]] = disp_pos
+    if delflg:
+      disp_pos = (0, 0)
+      file_dict[files[disp_count]] = disp_pos
 
 
     # display art
