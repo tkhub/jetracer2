@@ -45,6 +45,7 @@ def execute():
   disp_image = cv2.imread(files[disp_count], cv2.IMREAD_COLOR)
   disp_pos = file_dict[files[0]]
   lblatch = 0
+  delflg = False
 
   # Loop
   # while not rospy.is_shutdown():
@@ -55,9 +56,14 @@ def execute():
     # "1"key
     if key == nextkeycode: # NEXT: ->
       disp_count = disp_count + 1
+      delflg = False
     # "2" key
     if key == backkeycode: # PREV: <- 
       disp_count = disp_count -1
+      delflg = False
+    if key == delkeycode:
+      delflg = True
+
 
     if disp_count < 0:
       disp_count = 0
@@ -83,32 +89,32 @@ def execute():
 
     # display art
     temp = disp_image.copy()
-    cv2.line(temp, (mouse_pos[0], 0), (mouse_pos[0], temp.shape[0]),
-              (255, 0, 0), thickness=1, lineType=cv2.LINE_8)
-    cv2.line(temp, (0, mouse_pos[1]), (temp.shape[1], mouse_pos[1]),
-              (255, 0, 0), thickness=1, lineType=cv2.LINE_8)
-    cv2.circle(temp, disp_pos, 5, (0, 255, 0), thickness=3)
-    cv2.putText(temp, "PREV: 1 <- Del -> 2 :NEXT", 
-                (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
-                0.6, (255, 255, 255), 2)
-    cv2.putText(temp, files[disp_count],
-                (10, temp.shape[0]-10), cv2.FONT_HERSHEY_SIMPLEX,
-                0.6, (255, 255, 255), 2)
-    if key == delkeycode:
-      cv2.line(temp, (0, 0), (temp.shape[0], temp.shape[1]),
+    if delflg:
+      cv2.line(temp, (0, 0), (temp.shape[1], temp.shape[0]),
+                (0, 255, 0), thickness=1, lineType=cv2.LINE_8)
+      cv2.line(temp, (temp.shape[1], 0), (0, temp.shape[0]),
+                (0, 255, 0), thickness=1, lineType=cv2.LINE_8)
+      cv2.putText(temp, "PREV: 1 <- Del -> 2 :NEXT", 
+                  (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
+                  0.6, (255, 255, 255), 2)
+      cv2.putText(temp, files[disp_count],
+                  (10, temp.shape[0]-10), cv2.FONT_HERSHEY_SIMPLEX,
+                  0.6, (255, 255, 255), 2)
+      cv2.imshow('JETRACER_TRAINE_VIEW', temp)
+    else: 
+      cv2.line(temp, (mouse_pos[0], 0), (mouse_pos[0], temp.shape[0]),
                 (255, 0, 0), thickness=1, lineType=cv2.LINE_8)
-      cv2.line(temp, (temp.shape[0], 0), (0, temp.shape[1]),
-                (255, 0, 0), thickness=1, lineType=cv2.LINE_8)# display
-      
-      cv2.imshow('JETRACER_TRAINE_VIEW', temp)
-      time.sleep(1)
-#     消すならそれなりの処理をしないとファイルが有るはずなのに見つからなくなる。dicから消すとか
-      
-#      os.remove(files[disp_count])
+      cv2.line(temp, (0, mouse_pos[1]), (temp.shape[1], mouse_pos[1]),
+                (255, 0, 0), thickness=1, lineType=cv2.LINE_8)
+      cv2.circle(temp, disp_pos, 5, (0, 255, 0), thickness=3)
+      cv2.putText(temp, "PREV: 1 <- Del -> 2 :NEXT", 
+                  (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
+                  0.6, (255, 255, 255), 2)
+      cv2.putText(temp, files[disp_count],
+                  (10, temp.shape[0]-10), cv2.FONT_HERSHEY_SIMPLEX,
+                  0.6, (255, 255, 255), 2)
 
-    else:
       cv2.imshow('JETRACER_TRAINE_VIEW', temp)
-
   # rename
   for f in file_dict:
     pos = file_dict[f]
