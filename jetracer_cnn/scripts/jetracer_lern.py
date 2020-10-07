@@ -70,7 +70,7 @@ def execute():
   # Training: 準備したデータローダで学習開始
   model.train()
 
-  epoch_count = 10
+  epoch_count = 100
 
   while epoch_count > 0:
 
