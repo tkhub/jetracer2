@@ -32,11 +32,9 @@
 *.app
 
 # vscode setting
-c_cpp_properties.json
-arduino.json
-launch.json
+.vscode/
 
 #data
-.jpg
+.data/
 
 
