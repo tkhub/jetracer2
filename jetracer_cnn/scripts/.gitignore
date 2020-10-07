@@ -35,6 +35,6 @@
 .vscode/
 
 #data
-.data/
+*.jpg
 
 
