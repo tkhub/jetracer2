@@ -35,6 +35,12 @@
 .vscode/
 
 #data
+data/*
 *.jpg
 
+# model
+*.pth
+
+# jetracer folder
+jetracer/*
 
