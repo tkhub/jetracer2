@@ -127,7 +127,6 @@ def doexecute():
     STEERING_GAIN = 0.75
     STEERING_BIAS = 0.00
 
-    car.throttle = 0.15
     cnt = 0
     while True:
         image = camera0.read()
@@ -135,6 +134,7 @@ def doexecute():
         output = model_trt(image).detach().cpu().numpy().flatten()
         x = float(output[0])
         car.steering = x * STEERING_GAIN + STEERING_BIAS
+        car.throttle = 0.5
         print(str(cnt) + ":" + str(x) + ":" )
         cnt = cnt + 1
 
