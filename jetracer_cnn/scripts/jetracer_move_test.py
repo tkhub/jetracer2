@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+# -*- coding: utf-8 -*-
 from jetracer.nvidia_racecar import NvidiaRacecar
 car = NvidiaRacecar()
 print(car)

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import cv2
 import nanocamera as nano
 import Jetson.GPIO as GPIO
@@ -105,6 +107,7 @@ def execute():
     # testloop()
     print("REC END!! ...")
     camera0.release()
+    camera1.release()
     # finish
     del camera0
     GPIO.cleanup()
