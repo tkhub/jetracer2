@@ -73,10 +73,10 @@ def prepare():
 
 
 
-    STEERING_GAIN = 0.75
+    STEERING_GAIN = -0.75
     STEERING_BIAS = 0.00
 
-    car.throttle = 0.15
+    car.throttle = 0.25
     cnt = 0
     while True:
         image = camera0.read()
