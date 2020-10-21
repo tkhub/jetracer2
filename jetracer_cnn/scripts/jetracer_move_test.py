@@ -23,6 +23,7 @@ while True:
     elif var == "exit":
         print("Exit..")
         exitflg = True
+        break
     elif var == 'c':
         # 前回値をセンターとして保存する
         steering_center = steering
@@ -44,6 +45,7 @@ while True:
         print("steering = " + str(steering))
     car.steering = steering
     
+print("zeroing all output")
 car.steering = 0.0 
 car.throttle = 0.0
 
@@ -85,7 +87,9 @@ if not exitflg:
             print("throttle = " + str(throttle))
         car.throttle = throttle
 
-
+print("zeroing all output")
+car.steering = 0.0 
+car.throttle = 0.0
 print("steering_center = " +str(steering_center))
 print("steering_leftlim = " +str(steering_leftlim))
 print("steering_rightlim = " +str(steering_rightlim))
