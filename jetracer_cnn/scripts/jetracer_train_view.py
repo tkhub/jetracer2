@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# 学習入力
 
 import os
 import re
