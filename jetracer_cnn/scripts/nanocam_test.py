@@ -15,7 +15,12 @@ s_uuid = str(uuid.uuid1())
 
 filenameL = '%d_%d_%s_L.jpg' % (0, 0, s_uuid)
 filenameR = '%d_%d_%s_R.jpg' % (0, 0, s_uuid)
+filenameM = '%d_%d_%s_M.jpg' % (0, 0, s_uuid)
+imgMx = cv2.addWeighted(src1 = imgL, alpha=0.5, src2 = imgR, beta = 0.5, gamma = 0)
+
 cv2.imwrite(filenameL, imgL)
 cv2.imwrite(filenameR, imgR)
+cv2.imwrite(filenameM, imgMx)
+
 camera0.release()
 camera1.release()
