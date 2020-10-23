@@ -13,9 +13,9 @@ imgL = camera0.read()
 imgR = camera1.read()
 s_uuid = str(uuid.uuid1())
 
-filenameL = '%d_%d_%s_L.jpg' % (0, 0, s_uuid)
-filenameR = '%d_%d_%s_R.jpg' % (0, 0, s_uuid)
-filenameM = '%d_%d_%s_M.jpg' % (0, 0, s_uuid)
+filenameL = './nanocam_test/%d_%d_%s_L.jpg' % (0, 0, s_uuid)
+filenameR = './nanocam_test/%d_%d_%s_R.jpg' % (0, 0, s_uuid)
+filenameM = './nanocam_test/%d_%d_%s_M.jpg' % (0, 0, s_uuid)
 imgMx = cv2.addWeighted(src1 = imgL, alpha=0.5, src2 = imgR, beta = 0.5, gamma = 0)
 
 cv2.imwrite(filenameL, imgL)
