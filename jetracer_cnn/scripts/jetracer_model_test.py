@@ -5,9 +5,7 @@ import torchvision
 import cv2
 from torch2trt import torch2trt
 from torch2trt import TRTModule
-from jetracer.nvidia_racecar import NvidiaRacecar
 
-import nanocamera as nano
 
 from utils import preprocess
 import numpy as np
@@ -32,8 +30,10 @@ def prepare_torch():
 
     return model_trt
 
+
 def result_torch(model, img):
-    output = model(img).detach().cpu().numpy().flatten()
+    imgh = preprocess(img).half()
+    output = model(imgh).detach().cpu().numpy().flatten()
     x = float(output[0])
     y = float(output[1])
     return x, y
@@ -44,14 +44,23 @@ def execute():
 
     print("model preper end")
 
-    img = cv2.imread('LS_img.jpg')
-    print("LS(x,y) = " +result_torch(model, img))
+    imgLL = cv2.imread('LS_img.jpg')
+    imgL = cv2.imread('LF_img.jpg')
+    imgRR = cv2.imread('RS_img.jpg')
+    imgR = cv2.imread('RF_img.jpg')
+    imgC = cv2.imread('CF_img.jpg')
 
-    img = cv2.imread('RS_img.jpg')
-    print("LS(x,y) = " +result_torch(model, img))
+    xLL, yLL = result_torch(model, imgLL)
+    xL, yL = result_torch(model, imgL)
+    xR, yR = result_torch(model, imgR)
+    xRR, yRR = result_torch(model, imgRR)
+    xC, yC = result_torch(model, imgC)
 
-    img = cv2.imread('CF_img.jpg')
-    print("CF(x,y) = " +result_torch(model, img))
+    print("LS(x,y) = " +str(xLL)+ "," +str(yLL))
+    print("LF(x,y) = " +str(xL)+ "," +str(yL))
+    print("CF(x,y) = " +str(xC)+ "," +str(yC))
+    print("RF(x,y) = " +str(xR)+ "," +str(yR))
+    print("RS(x,y) = " +str(xRR)+ "," +str(yRR))
 
 if __name__ == '__main__':
     execute()
