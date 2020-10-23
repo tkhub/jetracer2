@@ -88,7 +88,7 @@ def execute():
     GPIO.add_event_detect(recbtn,GPIO.FALLING, callback=btn_th, bouncetime=200)
     phpathL = "./data/apexL/"
     phpathR = "./data/apexR/"
-    phpathMx = "./data/apex/"
+    phpathMx = "./data/apexM/"
     os.makedirs(phpathL, exist_ok = True)
     os.makedirs(phpathR, exist_ok = True)
     os.makedirs(phpathMx, exist_ok = True)
