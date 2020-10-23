@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import cv2
+import os
 import nanocamera as nano
 import Jetson.GPIO as GPIO
 import uuid
 import time
+
 
 # 録画状態状態遷移用変数
 recst = "recpre"
@@ -62,6 +64,7 @@ def recloopStereo(cameraL, cameraR, filepathMx, filepathL, filepathR, intv):
         cv2.imwrite(filenameL, imgL)
         cv2.imwrite(filenameR, imgR)
         imgMx = cv2.addWeighted(src1 = imgL, alpha=0.5, src2 = imgR, beta = 0.5, gamma = 0)
+        cv2.imwrite(filenameMx, imgMx)
         time.sleep(intv)
 
 def testloop():
