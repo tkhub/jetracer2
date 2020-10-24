@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import time
+import datetime
 from enum import Enum, auto
 import cv2
 import uuid
@@ -61,6 +62,9 @@ def prepare(cameraL, cameraR):
     cv2.imwrite(filenameMx, imgMx)
     print("## car test")
     print("!!!! CAR WILL MOVE !!!!")
+    print("car zeroing")
+    car.steering = 0.0 
+    car.throttle = 0.0
     okng = input("OK/ng>>")
     if okng == "OK":
         print("car zeroing")
@@ -103,6 +107,8 @@ def prepare(cameraL, cameraR):
 ####
 def autorun(cameraL, cameraR, model, str_inv, thr_inv, recpath, recintv):
     s_uuid = str(uuid.uuid1())
+    dt_now = datetime.datetime.now()
+    datestr = str(dt_now.strftime('%Y_%m_%d_%H:%M:%S'))
     STEERING_GAIN = 0.75
     STEERING_BIAS = 0.00
     STEERING_LIM = 0.65
@@ -144,10 +150,10 @@ def autorun(cameraL, cameraR, model, str_inv, thr_inv, recpath, recintv):
         if THROTTLE_FWLIM < y:
             y = THROTTLE_FWLIM
         car.steering = x
-        car.throttle = y
+        car.throttle = 0.1
         cnt = cnt + 1
         if (cnt % recintv) == 0:
-            recfile = recpath + '%d_%d_%d_%s.jpg' % (cnt, int(x * 100), int(y * 100), s_uuid)
+            recfile = recpath + '%s_%d_%d_%d_%s.jpg' % (datestr,cnt, int(x * 100), int(y * 100), s_uuid)
             cv2.imwrite(recfile, img)
 
 def car_DRB(throttle):
