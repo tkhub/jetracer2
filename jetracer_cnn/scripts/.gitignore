@@ -44,3 +44,5 @@ data/*
 # jetracer folder
 jetracer/*
 
+# code test
+test.py
