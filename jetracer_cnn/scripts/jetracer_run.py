@@ -162,7 +162,7 @@ def autorun(cameraL, cameraR, model, str_inv, thr_inv, recpath, recintv):
         if THROTTLE_FWLIM < y:
             y = THROTTLE_FWLIM
         car.steering = x
-        car.throttle = 0.1
+        car.throttle = 0.18
         cnt = cnt + 1
         if (cnt % recintv) == 0:
             recfile = recpath + '%s_%d_%d_%d_%s.jpg' % (datestr,cnt, int(x * 100), int(y * 100), s_uuid)
