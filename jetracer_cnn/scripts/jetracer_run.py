@@ -106,6 +106,10 @@ def prepare(cameraL, cameraR):
 
 ####
 def autorun(cameraL, cameraR, model, str_inv, thr_inv, recpath, recintv):
+    OKng = input("OK/ng >>")
+    if OKng != "OK":
+        return
+    
     s_uuid = str(uuid.uuid1())
     dt_now = datetime.datetime.now()
     datestr = str(dt_now.strftime('%Y_%m_%d_%H:%M:%S'))
@@ -126,14 +130,22 @@ def autorun(cameraL, cameraR, model, str_inv, thr_inv, recpath, recintv):
         THROTTLE_GAIN = THROTTLE_GAIN * -1
         THROTTLE_BIAS = THROTTLE_BIAS * -1
     cnt = 0    
+    print("!!!! COUNT DOWN !!!!")
+    print("3...")
+    time.sleep(1)
+    print("2..")
+    time.sleep(1)
+    print("1.")
+    time.sleep(1)
+    print("!!!! START !!!!")
     while True:
         # zaku
-        # img = cameraR.read()
+        img = cameraR.read()
 
         # gundam
-        imgL = cameraL.read()
-        imgR = cameraR.read()
-        img = cv2.addWeighted(src1 = imgL, alpha=0.5, src2 = imgR, beta = 0.5, gamma = 0)
+        #imgL = cameraL.read()
+        #imgR = cameraR.read()
+        #img = cv2.addWeighted(src1 = imgL, alpha=0.5, src2 = imgR, beta = 0.5, gamma = 0)
 
         imgh = preprocess(img).half()
         output = model(imgh).detach().cpu().numpy().flatten()
