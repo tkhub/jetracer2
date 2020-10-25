@@ -105,7 +105,7 @@ steering_center = 0.0
 steering_leftlim = 0.2
 steering_rightlim = -0.5
 throttle_center = 0.0
-throttle_forwardlim = 1.0
+throttle_forwardlim = 0.6
 throttle_forwardth = 0.05
 throttle_backwardlim = 0.0 
 """

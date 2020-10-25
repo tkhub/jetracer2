@@ -21,15 +21,15 @@ from jetracer.nvidia_racecar import NvidiaRacecar
 from utils import preprocess
 
 intrMsg = "go"
-STEERING_GAIN = -0.75
-STEERING_BIAS = 0.00
+STEERING_GAIN = -0.40
+STEERING_BIAS = 0.1
 STEERING_LIM = 0.65
 
-THROTTLE_GAIN = -0.25
-THROTTLE_BIAS = -0.05
-THROTTLE_FWLIM = 0.3
-THROTTLE_BKLIM = -0.3
-
+THROTTLE_GAIN = -0.23
+THROTTLE_BIAS = 0.00
+THROTTLE_FWLIM = 0.30
+THROTTLE_BKLIM = 0.075
+IMPLSINV  = 7
 # 状態状態遷移用変数
 class runsq(Enum):
     INIT = auto()
@@ -38,6 +38,7 @@ class runsq(Enum):
     GO = auto()
 
 runst = runsq.INIT
+runmon = False
 
 car = NvidiaRacecar()
 throttleflg = True
@@ -139,23 +140,30 @@ def autorun(cameraL, cameraR, model, recpath, recintv):
     global THROTTLE_FWLIM
     global THROTTLE_BKLIM
     global intrMsg
+    global runmon
 
     
     s_uuid = str(uuid.uuid1())
     dt_now = datetime.datetime.now()
     datestr = str(dt_now.strftime('%Y_%m_%d_%H:%M:%S'))
     cnt = 0    
+    ys = 0.0
     while intrMsg != "QUIT":
         car.steering = 0.0
         car.throttle = 0.0
-        while intrMsg != "PAUSE":
+        runmon = False
+        runmon_tmp = False
+        while intrMsg != "PAUSE" and intrMsg != "QUIT":
+            runmon = True
+            if runmon and not runmon_tmp:
+                print("autorun active!")
             # zaku
-            img = cameraR.read()
+            #img = cameraR.read()
 
             # gundam
-            #imgL = cameraL.read()
-            #imgR = cameraR.read()
-            #img = cv2.addWeighted(src1 = imgL, alpha=0.5, src2 = imgR, beta = 0.5, gamma = 0)
+            imgL = cameraL.read()
+            imgR = cameraR.read()
+            img = cv2.addWeighted(src1 = imgL, alpha=0.5, src2 = imgR, beta = 0.5, gamma = 0)
 
             imgh = preprocess(img).half()
             output = model(imgh).detach().cpu().numpy().flatten()
@@ -171,12 +179,24 @@ def autorun(cameraL, cameraR, model, recpath, recintv):
                 y = THROTTLE_BKLIM
             if THROTTLE_FWLIM < y:
                 y = THROTTLE_FWLIM
+            if 0 < y and y < 0.15:
+                if cnt % IMPLSINV == 0:
+                    ys = 0.35
+                    y = 0.35
+            else:
+                if 0.4 > abs(x):
+                    if y > 0.2:
+                        y  = 0.2
+                    
+
+            ys = (y - ys) * 0.5 + ys
             car.steering = x
-            car.throttle = y
+            car.throttle = ys
             cnt = cnt + 1
-            if (cnt % recintv) == 0:
-                recfile = recpath + '%s_%d_%d_%d_%s.jpg' % (datestr,cnt, int(x * 100), int(y * 100), s_uuid)
-                cv2.imwrite(recfile, img)
+           # if (cnt % recintv) == 0:
+           #     recfile = recpath + '%s_%d_%d_%d_%s.jpg' % (datestr,cnt, int(x * 100), int(y * 100), s_uuid)
+           #     cv2.imwrite(recfile, img)
+            runmon_tmp = runmon
     car.steering = 0.0
     car.throttle = 0.0
     print("# auto run end...")
@@ -219,10 +239,22 @@ def commander():
                     THROTTLE_BIAS = float(ver)
                     print("THROTTLE_BIAS was updated to " +str(THROTTLE_BIAS))
 
+                ver = input("THROTTLE_FWLIM = " +str(THROTTLE_FWLIM)+ "(float/\"keep\")>>")
+                if ver != "keep":
+                    THROTTLE_FWLIM = float(ver)
+                    print("THROTTLE_FWLIM was updated to " +str(THROTTLE_FWLIM))
+
+                ver = input("THROTTLE_BKLIM = " +str(THROTTLE_BKLIM)+ "(float/\"keep\")>>")
+                if ver != "keep":
+                    THROTTLE_BKLIM = float(ver)
+                    print("THROTTLE_FWLIM was updated to " +str(THROTTLE_BKLIM))
+
                 print("STEERING_GAIN =" +str(STEERING_GAIN))
                 print("STEERING_BIAS =" +str(STEERING_BIAS))
                 print("THROTTLE_GAIN =" +str(THROTTLE_GAIN))
                 print("THROTTLE_BIAS =" +str(THROTTLE_BIAS))
+                print("THROTTLE_FWLIM =" +str(THROTTLE_FWLIM))
+                print("THROTTLE_BKLIm =" +str(THROTTLE_BKLIM))
             elif cmd == "start":
                 intrMsg = "GO"
             elif cmd == "quit":
