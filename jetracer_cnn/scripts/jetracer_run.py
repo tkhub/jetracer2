@@ -21,13 +21,13 @@ from jetracer.nvidia_racecar import NvidiaRacecar
 from utils import preprocess
 
 intrMsg = "go"
-STEERING_GAIN = 0.75
+STEERING_GAIN = -0.75
 STEERING_BIAS = 0.00
 STEERING_LIM = 0.65
 
-THROTTLE_GAIN = 0.75
-THROTTLE_BIAS = 0.0
-THROTTLE_FWLIM = 0.5
+THROTTLE_GAIN = -0.25
+THROTTLE_BIAS = -0.05
+THROTTLE_FWLIM = 0.3
 THROTTLE_BKLIM = -0.3
 
 # 状態状態遷移用変数
