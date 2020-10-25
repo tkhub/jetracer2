@@ -44,11 +44,16 @@ def execute():
 
     print("model preper end")
 
-    imgLL = cv2.imread('./modeltestimg/LS_img.jpg')
-    imgL = cv2.imread('./modeltestimg/LF_img.jpg')
-    imgRR = cv2.imread('./modeltestimg/RS_img.jpg')
-    imgR = cv2.imread('./modeltestimg/RF_img.jpg')
-    imgC = cv2.imread('./modeltestimg/CF_img.jpg')
+    # imgLL = cv2.imread('./modeltestimg/str/LS_img.jpg')
+    # imgL = cv2.imread('./modeltestimg/str/LF_img.jpg')
+    # imgRR = cv2.imread('./modeltestimg/str/RS_img.jpg')
+    # imgR = cv2.imread('./modeltestimg/str/RF_img.jpg')
+    # imgC = cv2.imread('./modeltestimg/str/CF_img.jpg')
+    imgLL = cv2.imread('./modeltestimg/mono/LS_img.jpg')
+    imgL = cv2.imread('./modeltestimg/mono/LF_img.jpg')
+    imgRR = cv2.imread('./modeltestimg/mono/RS_img.jpg')
+    imgR = cv2.imread('./modeltestimg/mono/RF_img.jpg')
+    imgC = cv2.imread('./modeltestimg/mono/CF_img.jpg')
 
     xLL, yLL = result_torch(model, imgLL)
     xL, yL = result_torch(model, imgL)
