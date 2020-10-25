@@ -52,8 +52,8 @@ quitkeycode = 113
 
 def makeStereoimgRG():
 
-  filesL = glob.glob('data/apexL/*')
-  files = glob.glob('data/apex/*')
+  filesL = glob.glob('data/recR/*')
+  files = glob.glob('data/recL/*')
   files_num = len(files)
 
   for f in files:
@@ -66,9 +66,32 @@ def mouse_callback(event, x, y, flags, param):
 
   mouse_pos = (x, y)
   mouse_event = event
-    
 
+def loadFileList(pathstrl, pathstrr):
+    pass
+
+def teachXY(fileLists, filepathstrL, filepathstrR):
+    return "hoge", "foo"
+
+def imgConvert(a,b,c):
+    pass
+    
 def execute():
+    global mouse_pos
+    global mouse_event
+    # 入力ファイルの一覧を作る
+    inputPathStrL = './data/recL/'
+    inputPathStrR = './data/recR/'
+    outputPathStr = './data/apex/'
+    fileLists = loadFileList(inputPathStrL, inputPathStrR)
+
+    # イメージを読み出して表示し、X・Y座標を入力させる
+    fileCnvList , rawImgList = teachXY(inputPathStrL, inputPathStrR, fileLists)
+
+    # イメージを所定の場所に変換し保存する。
+    imgConvert(outputPathStr, fileCnvList, rawImgList)
+
+def execute_nkd():
   global mouse_pos
   global mouse_event
 
@@ -196,9 +219,9 @@ def execute():
 
 if __name__ == '__main__':
 
-  execute()
+  execute_nkd()
   #try
-  #  execute()
+  #  execute_nkd()
   # except rospy.ROSInterruptException as ex:
   #  rospy.logerr(ex)
   # except KeyboardInterrupt:
