@@ -67,10 +67,7 @@ def init_nanocam(imgwd, imghg, fpsc, angle):
     cameraR = nano.Camera(device_id=1, flip=angle, width=imgwd, height=imghg, fps=fpsc)
     return cameraL, cameraR
 
-def runWaitandCountDown():
-    OKng = input("RUN OK/ng >>")
-    if OKng != "OK":
-        return
+def runCountDown():
     print("!!!! COUNT DOWN !!!!")
     print("3...")
     time.sleep(1)
@@ -139,7 +136,6 @@ def prepare(cameraL, cameraR):
     return model
 ####
 
-
 ####
 def autorun(cameraL, cameraR, model, recpath, recintv):
     global STEERING_GAIN
@@ -167,6 +163,7 @@ def autorun(cameraL, cameraR, model, recpath, recintv):
             runmon = True
             if runmon and not runmon_tmp:
                 print("autorun active!")
+                runCountDown()
             # zaku
             #img = cameraR.read()
 
@@ -265,6 +262,7 @@ def commander():
                 print("THROTTLE_BIAS =" +str(THROTTLE_BIAS))
                 print("THROTTLE_FWLIM =" +str(THROTTLE_FWLIM))
                 print("THROTTLE_BKLIm =" +str(THROTTLE_BKLIM))
+                intrMsg = "GO"
             elif cmd == "start":
                 intrMsg = "GO"
             elif cmd == "quit":
@@ -280,16 +278,19 @@ def execute():
     model = prepare(cameraL, cameraR)
 
     # wait user go
-    runWaitandCountDown()
-
+    if waitFlg:
+        OKng = input("RUN OK/ng >>")
+        if OKng != "OK":
+            return
     # run and command wait
     intrMsg = "GO"
-    thrdAutoRun = threading.Thread(target=autorun, args=(cameraL, cameraR, model, "./autorunrec/", 20))
+    autorun(cameraL, cameraR, model, "./autorunrec/", 20)
+    # thrdAutoRun = threading.Thread(target=autorun, args=(cameraL, cameraR, model, "./autorunrec/", 20))
     thrdCommander = threading.Thread(target=commander)
     thrdCommander.start()
-    thrdAutoRun.start() 
+    #thrdAutoRun.start() 
     thrdCommander.join()
-    thrdAutoRun.join()
+    #thrdAutoRun.join()
     del cameraR
     del cameraL
     print("# ---- END ----")
