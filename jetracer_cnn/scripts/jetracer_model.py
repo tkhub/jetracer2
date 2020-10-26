@@ -12,6 +12,23 @@ import numpy as np
 
 def prepare_torch():
 
+    #CATEGORIES = ['apex']
+    device = torch.device('cuda')
+    model = torchvision.models.resnet18(pretrained=False)
+    model.fc = torch.nn.Linear(512, 2)
+    # model = model.cuda().eval().half()
+    # model.load_state_dict(torch.load('model.pth'))
+    model = model.to(device)
+
+    model.load_state_dict(torch.load('data/model.pth'))
+    model = model.cuda().eval().half()
+
+    model_trt = TRTModule()
+    model_trt.load_state_dict(torch.load('data/model.pth'))
+    return model
+
+def prepare_torch_old():
+
     CATEGORIES = ['apex']
     device = torch.device('cuda')
     model = torchvision.models.resnet18(pretrained=False)
@@ -40,9 +57,11 @@ def result_torch(model, img):
 
 def execute():
     print("jetracer_model_test")
-    model = prepare_torch()
+    # model = prepare_torch()
+    model = prepare_torch_old()
 
     print("model preper end")
+    print(model)
 
     imgLL = cv2.imread('./modeltestimg/str/LS_img.jpg')
     imgL = cv2.imread('./modeltestimg/str/LF_img.jpg')
@@ -66,6 +85,37 @@ def execute():
     print("CF(x,y) = " +str(xC)+ "," +str(yC))
     print("RF(x,y) = " +str(xR)+ "," +str(yR))
     print("RS(x,y) = " +str(xRR)+ "," +str(yRR))
+
+    model2 = prepare_torch()
+    #model = prepare_torch_old()
+
+    print("model preper end")
+    print(model2)
+    print("stop")
+
+    imgLL = cv2.imread('./modeltestimg/str/LS_img.jpg')
+    imgL = cv2.imread('./modeltestimg/str/LF_img.jpg')
+    imgRR = cv2.imread('./modeltestimg/str/RS_img.jpg')
+    imgR = cv2.imread('./modeltestimg/str/RF_img.jpg')
+    imgC = cv2.imread('./modeltestimg/str/CF_img.jpg')
+    #imgLL = cv2.imread('./modeltestimg/mono/LS_img.jpg')
+    #imgL = cv2.imread('./modeltestimg/mono/LF_img.jpg')
+    #imgRR = cv2.imread('./modeltestimg/mono/RS_img.jpg')
+    #imgR = cv2.imread('./modeltestimg/mono/RF_img.jpg')
+    #imgC = cv2.imread('./modeltestimg/mono/CF_img.jpg')
+
+    xLL, yLL = result_torch(model2, imgLL)
+    xL, yL = result_torch(model2, imgL)
+    xR, yR = result_torch(model2, imgR)
+    xRR, yRR = result_torch(model2, imgRR)
+    xC, yC = result_torch(model2, imgC)
+
+    print("LS(x,y) = " +str(xLL)+ "," +str(yLL))
+    print("LF(x,y) = " +str(xL)+ "," +str(yL))
+    print("CF(x,y) = " +str(xC)+ "," +str(yC))
+    print("RF(x,y) = " +str(xR)+ "," +str(yR))
+    print("RS(x,y) = " +str(xRR)+ "," +str(yRR))
+
 
 if __name__ == '__main__':
     execute()
