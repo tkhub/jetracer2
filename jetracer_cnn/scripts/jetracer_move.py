@@ -16,14 +16,36 @@ class jetracerMove(NvidiaRacecar):
         # Left, Right GAIN
         self.__STEERINGGAIN = [self.__STEERINGLIM[0] - self.__STEERINGTRIM,  abs(self.__STEERINGLIM[1]) - self.__STEERINGTRIM]
 
-        # Forward, Break, BackWard
+        # if Assign is inverted 
         self.__THROTTLEINV = False
-        self.__THROTTLELIM = [0.5, -0.5, -0.5]
+        # Forward, Break, BackWard
+        self.__THROTTLELIM = [0.465, -0.5, -0.5]
         self.__THROTTLETRIM = 0.0
         self.__THROTTLEWAITBK = 0.1
+        self.__THROTTLEHYS = 0.065
+        self.__THROTTLEZERO = 0.01
         # Forward, Break, BackWard
-        self.__THROTTLEGAIN = [self.__THROTTLELIM[0] - self.__THROTTLETRIM,  abs(self.__THROTTLELIM[1]) - self.__THROTTLETRIM, abs(self.__THROTTLELIM[2]) - self.__THROTTLETRIM]
+        self.__THROTTLEGAIN = [self.__THROTTLELIM[0] - self.__THROTTLETRIM - self.__THROTTLEHYS,  abs(self.__THROTTLELIM[1]) - self.__THROTTLETRIM - self.__THROTTLEHYS, abs(self.__THROTTLELIM[2]) - self.__THROTTLETRIM - self.__THROTTLEHYS]
 
+    def Showsetting(self):
+        print(self.__STEERINGINV)
+        print(self.__STEERINGLIM)        
+        # 
+        print(self.__STEERINGTRIM)
+
+        # Left, Right GAIN
+        print(self.__STEERINGGAIN)
+
+        # if Assign is inverted 
+        print(self.__THROTTLEINV)
+        # Forward, Break, BackWard
+        print(self.__THROTTLELIM)
+        print(self.__THROTTLETRIM)
+        print(self.__THROTTLEWAITBK)
+        print(self.__THROTTLEHYS)
+        print(self.__THROTTLEZERO)
+        # Forward, Break, BackWard
+        print(self.__THROTTLEGAIN)
     def Steering(self, strvar):
         x = 0.0
         # inverter
@@ -55,9 +77,14 @@ class jetracerMove(NvidiaRacecar):
         if 1.0 < thrtvar:
             thrtvar = 1.0
 
-        if thrtvar < 0.0:
+        # ほぼゼロ
+        if abs(thrtvar) < self.__THROTTLEZERO:
+            y = 0.0
+        # 逆転 or ブレーキ
+        elif thrtvar < 0.0:
+            # ブレーキ
             if backFlg:
-                y = self.__THROTTLEGAIN[1] * thrtvar + self.__THROTTLETRIM
+                y = self.__THROTTLEGAIN[2] * thrtvar + self.__THROTTLETRIM + self.__THROTTLEHYS
                 # 一度ブレーキ
                 self.throttle = self.__THROTTLELIM[1] 
                 time.sleep(self.__THROTTLEWAITBK)
@@ -66,15 +93,16 @@ class jetracerMove(NvidiaRacecar):
                 time.sleep(0.04)
                 self.throttle = y
             else:
-                y = self.__THROTTLEGAIN[1] * thrtvar + self.__THROTTLETRIM
+                y = self.__THROTTLEGAIN[1] * thrtvar + self.__THROTTLETRIM - self.__THROTTLEHYS
         else:
-            y = self.__THROTTLEGAIN[0] * thrtvar + self.__THROTTLETRIM
+            y = self.__THROTTLEGAIN[0] * thrtvar + self.__THROTTLETRIM + self.__THROTTLEHYS
         self.throttle = y
 
 def __move():
     car = jetracerMove()
     exitflg = False 
     print("jetracer test....")
+    car.Showsetting()
     # init
     car.Steering(0)
     car.Throttle(0,False)
@@ -140,7 +168,7 @@ def __directmove():
     steering_leftlim = 0.0
     steering_rightlim = 0.0
     exitflg = False 
-    print("jetracer test....")
+    print("jetracer adjust....")
     # init
     car.steering = 0.0 
     car.throttle = 0.0
@@ -197,18 +225,18 @@ def __directmove():
                 # 前回値をセンターとして保存する
                 throttle_center = throttle
                 print("center = " +str(throttle_center))
-            elif var == 'l':
-                # 前回値を左リミットとして保存する
+            elif var == 'f':
+                # 前回値を前進リミットとして保存する
                 throttle_forwardlim = throttle
-                print("leftlim = " +str(throttle_forwardlim))
+                print("forwardlim = " +str(throttle_forwardlim))
             elif var == 't':
-                # 前回値を左リミットとして保存する
+                # 前回値をバックリミットとして保存する
                 throttle_forwardth = throttle
                 print("leftlim = " +str(throttle_forwardth))
-            elif var == 'r':
-                # 前回値を右リミットとして保存する
+            elif var == 'b':
+                # 前回値をバックリミットとして保存する
                 throttle_backwardlim = throttle
-                print("rightlim = " +str(throttle_backwardlim))
+                print("backwardlim = " +str(throttle_backwardlim))
             else:
                 try:
                     throttle = float(var)
@@ -240,5 +268,10 @@ def __directmove():
     throttle_backwardlim = 0.0 
     """
 if __name__ == "__main__":
-    __move()
+    cmd = input("test(\"test\" or \"\") or adjust (\"adjust\")>>")
+    if cmd == "adjust":
+        __directmove()
+    else:
+        print("move test")
+        __move()
    # testmove()
