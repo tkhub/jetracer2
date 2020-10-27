@@ -13,6 +13,7 @@ imgL = camera0.read()
 imgR = camera1.read()
 s_uuid = str(uuid.uuid1())
 
+print("snap_shot!")
 filenameL = './nanocam_test/%d_%d_%s_L.jpg' % (0, 0, s_uuid)
 filenameR = './nanocam_test/%d_%d_%s_R.jpg' % (0, 0, s_uuid)
 filenameM = './nanocam_test/%d_%d_%s_M.jpg' % (0, 0, s_uuid)
