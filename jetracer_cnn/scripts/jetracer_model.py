@@ -10,23 +10,29 @@ from torch2trt import TRTModule
 from utils import preprocess
 import numpy as np
 
-def prepare_torch():
 
-    CATEGORIES = ['apex']
+def prepare_torch_trt():
+
+    # create model
     device = torch.device('cuda')
     model = torchvision.models.resnet18(pretrained=False)
-    model.fc = torch.nn.Linear(512, 2 * len(CATEGORIES))
+    model.fc = torch.nn.Linear(512, 2)
     model = model.cuda().eval().half()
-    # model.load_state_dict(torch.load('model.pth'))
+
+    # load saved model
     model.load_state_dict(torch.load('data/model.pth'))
 
+    # convert and optimize the model using torch2trt.
     data = torch.zeros((1, 3, 224, 224)).cuda().half()
     model_trt = torch2trt(model, [data], fp16_mode=True)
-    torch.save(model_trt.state_dict(), 'road_following_model_trt.pth')
+
+    # save optimized model
+    #torch.save(model_trt.state_dict(), 'road_following_model_trt.pth')
 
 
-    model_trt = TRTModule()
-    model_trt.load_state_dict(torch.load('road_following_model_trt.pth'))
+    # load optimized model
+    #model_trt = TRTModule()
+    #model_trt.load_state_dict(torch.load('road_following_model_trt.pth'))
 
     return model_trt
 
@@ -40,15 +46,17 @@ def result_torch(model, img):
 
 def execute():
     print("jetracer_model_test")
-    model = prepare_torch()
+    # model = prepare_torch()
+    model = prepare_torch_trt()
 
     print("model preper end")
+    print(model)
 
-    # imgLL = cv2.imread('./modeltestimg/str/LS_img.jpg')
-    # imgL = cv2.imread('./modeltestimg/str/LF_img.jpg')
-    # imgRR = cv2.imread('./modeltestimg/str/RS_img.jpg')
-    # imgR = cv2.imread('./modeltestimg/str/RF_img.jpg')
-    # imgC = cv2.imread('./modeltestimg/str/CF_img.jpg')
+    #imgLL = cv2.imread('./modeltestimg/str/LS_img.jpg')
+    #imgL = cv2.imread('./modeltestimg/str/LF_img.jpg')
+    #imgRR = cv2.imread('./modeltestimg/str/RS_img.jpg')
+    #imgR = cv2.imread('./modeltestimg/str/RF_img.jpg')
+    #imgC = cv2.imread('./modeltestimg/str/CF_img.jpg')
     imgLL = cv2.imread('./modeltestimg/mono/LS_img.jpg')
     imgL = cv2.imread('./modeltestimg/mono/LF_img.jpg')
     imgRR = cv2.imread('./modeltestimg/mono/RS_img.jpg')
@@ -66,6 +74,7 @@ def execute():
     print("CF(x,y) = " +str(xC)+ "," +str(yC))
     print("RF(x,y) = " +str(xR)+ "," +str(yR))
     print("RS(x,y) = " +str(xRR)+ "," +str(yRR))
+
 
 if __name__ == '__main__':
     execute()

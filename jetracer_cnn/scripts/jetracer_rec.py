@@ -139,7 +139,7 @@ def execute():
     print("REC START! ...")
 #    recloop_old(camera0, "./data/apex/", 0.1)
 #    recloopDual_old(camera0,camera1, phpathL,phpathR, 0.1)
-    recloopStereo_old(camera0,camera1, phpathMx, phpathL,phpathR, 0.05)
+    recloopStereo_old(camera0,camera1, phpathMx, phpathL,phpathR, 0.1)
 #    recloopDual(camera0,camera1, phpathL,phpathR, 0.05)
     # testloop()
     print("REC END!! ...")
