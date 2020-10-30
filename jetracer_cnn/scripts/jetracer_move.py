@@ -26,6 +26,13 @@ class jetracerMove(NvidiaRacecar):
         self.__THROTTLEZERO = 0.01
         # Forward, Break, BackWard
         self.__THROTTLEGAIN = [self.__THROTTLELIM[0] - self.__THROTTLETRIM - self.__THROTTLEHYS,  abs(self.__THROTTLELIM[1]) - self.__THROTTLETRIM - self.__THROTTLEHYS, abs(self.__THROTTLELIM[2]) - self.__THROTTLETRIM - self.__THROTTLEHYS]
+        time.sleep(0.1)
+        self.steering = 0.0
+        self.throttle = 0.0
+        time.sleep(0.1)
+        self.throttle = 0.01
+        time.sleep(0.1)
+        self.throttle = 0.00
 
     def Showsetting(self):
         print(self.__STEERINGINV)
@@ -64,6 +71,7 @@ class jetracerMove(NvidiaRacecar):
             x = self.__STEERINGGAIN[0] * strvar + self.__STEERINGTRIM
 
         self.steering = x
+        return x
 
 
     def Throttle(self, thrtvar, backFlg):
@@ -97,6 +105,7 @@ class jetracerMove(NvidiaRacecar):
         else:
             y = self.__THROTTLEGAIN[0] * thrtvar + self.__THROTTLETRIM + self.__THROTTLEHYS
         self.throttle = y
+        return y
 
 def __move():
     car = jetracerMove()
@@ -123,8 +132,7 @@ def __move():
             except:
                 print(var +" is not number. Next.")
                 break
-            print("steering = " + str(steering))
-        car.Steering(steering)
+            print("steering = " + str(steering) +"(output = "+str(car.Steering(steering)) + ")")
         
     print("zeroing all output")
     car.Steering(0)
@@ -136,7 +144,7 @@ def __move():
     if not exitflg:
         print("(2/2) throttle test")
         while True:
-            var = input("throttle  (float / \"exit\" ) = ")
+            var = input("throttle  (float / \"exit\" / \"back\") = ")
             if var == "exit":
                 print("Exit..")
                 break
@@ -149,8 +157,8 @@ def __move():
                 except:
                     print(var +" is not number. Next.")
                     break
-                print("throttle = " + str(throttle))
-            car.Throttle(throttle, backFlg)
+                print("throttle = " + str(throttle)+ "(output = " +str(car.Throttle(throttle, backFlg))+ ")")
+
 
     print("zeroing all output")
     car.steering = 0.0 
