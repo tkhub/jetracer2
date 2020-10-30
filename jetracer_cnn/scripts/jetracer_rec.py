@@ -50,7 +50,7 @@ def recloopDual_old(cameraL, cameraR, filepathL, filepathR, intv):
         cv2.imwrite(filenameR, imgR)
         time.sleep(intv)
 
-def recloopDual(cameraL, cameraR, filepathL, filepathR, intv):
+def recloopDual(cameraL, cameraR, filepath, intv):
     global recst
     while recst == "recgo":
         #img = camera.read()
@@ -58,8 +58,8 @@ def recloopDual(cameraL, cameraR, filepathL, filepathR, intv):
         imgR = cameraR.read()
         timestmp = time.time()
         # filename = filepath + '%d_%d_%s.jpg' % (0, 0, s_uuid))
-        filenameL = filepathL + str(timestmp) + '.jpg'
-        filenameR = filepathR + str(timestmp) + '.jpg'
+        filenameL = filepath + str(timestmp) + '_L.jpg'
+        filenameR = filepath + str(timestmp) + '_R.jpg'
         cv2.imwrite(filenameL, imgL)
         cv2.imwrite(filenameR, imgR)
         time.sleep(intv)
@@ -150,8 +150,39 @@ def execute():
     GPIO.cleanup()
 
 
+def new_execute():
+    global recst
+    global recbtn
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(recbtn, GPIO.IN)
+    GPIO.add_event_detect(recbtn,GPIO.FALLING, callback=btn_th, bouncetime=200)
+    phpath = "./data/rec/"
+    os.makedirs(phpath, exist_ok = True)
+
+    # Left Camera
+    camera0 = nano.Camera(device_id=0, flip=2, width=224, height=224, fps=60)
+    # Right Camera
+    camera1 = nano.Camera(device_id=1, flip=2, width=224, height=224, fps=60)
+    # wait rec button
+    print("REC wait ...")
+    waitrec()
+    # rec start
+    print("REC START! ...")
+#    recloop_old(camera0, "./data/apex/", 0.1)
+#    recloopDual_old(camera0,camera1, phpathL,phpathR, 0.1)
+#    recloopStereo_old(camera0,camera1, phpathMx, phpathL,phpathR, 0.1)
+    recloopDual(camera0,camera1, phpath, 0.05)
+    # testloop()
+    print("REC END!! ...")
+    camera0.release()
+    camera1.release()
+    # finish
+    del camera0
+    GPIO.cleanup()
+
 
 
 
 if __name__ == '__main__':
-    execute()
+    # execute()
+    new_execute()
