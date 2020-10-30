@@ -8,15 +8,17 @@ import cv2
 import uuid
 import time
 import numpy as np
+from jetracer_move import jetracerMove
 
 import nanocamera as nano
 # jetracerが独占しているので使えない
 # import Jetson.GPIO as GPIO
 
-from jetracer_model import prepare_torch
+from jetracer_model import prepare_torch_trt
 from jetracer_model import result_torch
 
 from jetracer.nvidia_racecar import NvidiaRacecar
+import jetracer_move
 
 from utils import preprocess
 
@@ -50,7 +52,8 @@ class runsq(Enum):
 runst = runsq.INIT
 runmon = False
 
-car = NvidiaRacecar()
+#car = NvidiaRacecar()
+car = jetracerMove()
 throttleflg = True
 
 def init():
@@ -79,6 +82,66 @@ def runCountDown():
 
 
 def prepare(cameraL, cameraR):
+    global car
+    print("#---- prepare system ----#")
+    print("## camera test")
+    imgL = cameraL.read()
+    imgR = cameraR.read()
+    s_uuid = str(uuid.uuid1())
+    dt_now = datetime.datetime.now()
+    datestr = dt_now.strftime('%y_%m_%d_%H_%M_%S')
+    # filename = filepath + '%d_%d_%s.jpg' % (0, 0, s_uuid))
+    filenameMx = './nanocam_test/%d_%d_%s.jpg' % (0, 0, datestr)
+    filenameL = './nanocam_test/%d_%d_%s.jpg' % (0, 0, datestr)
+    filenameR = './nanocam_test/%d_%d_%s.jpg' % (0, 0, datestr)
+    cv2.imwrite(filenameL, imgL)
+    cv2.imwrite(filenameR, imgR)
+    imgMx = cv2.addWeighted(src1 = imgL, alpha=0.5, src2 = imgR, beta = 0.5, gamma = 0)
+    cv2.imwrite(filenameMx, imgMx)
+    print("## car test")
+    print("!!!! CAR WILL MOVE !!!!")
+    print("car zeroing")
+    car.Steering(0.0)
+    car.Throttle(0.0, False)
+    okng = input("OK/ng>>")
+    if okng == "OK":
+        print("car zeroing")
+        car.Steering(0.0)
+        car.Throttle(0.0, False)
+        print("Left")
+        car.Steering(1)
+        time.sleep(1)
+
+        print("Right")
+        car.Steering(-1)
+        time.sleep(1)
+
+        car.Steering(0.0)
+
+        print("FORWARD")
+        car.Throttle(0.2, False)
+        time.sleep(0.2)
+        car.Throttle(0.0, False)
+        
+        print("BREAK")
+        car.Throttle(-0.5, False)
+        time.sleep(0.5)
+        car.Throttle(0, False)
+
+        print("BACKWARD")
+        car.Throttle(-0.3, True)
+        time.sleep(0.2)
+        car.Throttle(0.0, True)
+    else:
+        print("skip...")
+
+
+    print("## model prepaer")
+    model = prepare_torch_trt()
+    return model
+####
+
+def prepare_old(cameraL, cameraR):
     global car
     print("#---- prepare system ----#")
     print("## camera test")
@@ -134,10 +197,7 @@ def prepare(cameraL, cameraR):
     print("## model prepaer")
     model = prepare_torch()
     return model
-####
-
-####
-def autorun(cameraL, cameraR, model, recpath, recintv):
+def autorun_old(cameraL, cameraR, model, recpath, recintv):
     global STEERING_GAIN
     global STEERING_BIAS
     global STEERING_LIM
@@ -206,6 +266,56 @@ def autorun(cameraL, cameraR, model, recpath, recintv):
             runmon_tmp = runmon
     car.steering = 0.0
     car.throttle = 0.0
+    print("# auto run end...")
+####
+def autorun(cameraL, cameraR, model, recpath, recintv):
+    global STEERING_GAIN
+    global STEERING_BIAS
+    global STEERING_LIM
+    global THROTTLE_GAIN
+    global THROTTLE_BIAS
+    global THROTTLE_FWLIM
+    global THROTTLE_BKLIM
+    global intrMsg
+    global runmon
+
+    
+    s_uuid = str(uuid.uuid1())
+    dt_now = datetime.datetime.now()
+    datestr = str(dt_now.strftime('%Y_%m_%d_%H:%M:%S'))
+    cnt = 0    
+    ys = 0.0
+    while intrMsg != "QUIT":
+        car.steering = 0.0
+        car.throttle = 0.0
+        runmon = False
+        runmon_tmp = False
+        while intrMsg != "PAUSE" and intrMsg != "QUIT":
+            runmon = True
+            if runmon and not runmon_tmp:
+                print("autorun active!")
+                runCountDown()
+            # zaku
+            #img = cameraR.read()
+
+            # gundam
+            imgL = cameraL.read()
+            imgR = cameraR.read()
+            img = cv2.addWeighted(src1 = imgL, alpha=0.5, src2 = imgR, beta = 0.5, gamma = 0)
+
+            output = result_torch(model, img)
+
+            x = float(output[0])* STEERING_GAIN + STEERING_BIAS 
+            y = float(output[1]) * THROTTLE_GAIN + THROTTLE_BIAS
+            car.Steering(x)
+            car.Throttle(y,False)
+            cnt = cnt + 1
+           # if (cnt % recintv) == 0:
+           #     recfile = recpath + '%s_%d_%d_%d_%s.jpg' % (datestr,cnt, int(x * 100), int(y * 100), s_uuid)
+           #     cv2.imwrite(recfile, img)
+            runmon_tmp = runmon
+    car.Steering(0)
+    car.Throttle(0, False)
     print("# auto run end...")
 
 def commander():
@@ -278,16 +388,16 @@ def execute():
     model = prepare(cameraL, cameraR)
 
     # wait user go
-    if waitFlg:
-        OKng = input("RUN OK/ng >>")
-        if OKng != "OK":
-            return
+    OKng = input("RUN OK/ng >>")
+    if OKng != "OK":
+        return
     # run and command wait
     intrMsg = "GO"
-    autorun(cameraL, cameraR, model, "./autorunrec/", 20)
-    # thrdAutoRun = threading.Thread(target=autorun, args=(cameraL, cameraR, model, "./autorunrec/", 20))
+    #thrdAutoRun = threading.Thread(target=autorun, args=(cameraL, cameraR, model, "./autorunrec/", 20))
     thrdCommander = threading.Thread(target=commander)
     thrdCommander.start()
+    autorun(cameraL, cameraR, model, "./autorunrec/", 20)
+    #autorun_old(cameraL, cameraR, model, "./autorunrec/", 20)
     #thrdAutoRun.start() 
     thrdCommander.join()
     #thrdAutoRun.join()
