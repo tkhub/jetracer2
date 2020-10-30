@@ -6,9 +6,11 @@ import os
 import re
 import glob
 import cv2
+import numpy as np
 import uuid
 import time
 import pathlib
+import copy
 
 
 mouse_pos = (0, 0)
@@ -67,7 +69,8 @@ def execute():
     xylist, filelistL, filelistR = teachXY(inputPath, filelistL, filelistR)
 
     # イメージを所定の場所に変換し保存する。
-    imgConvert(inputPath, outputPath, xylist, filelistL, filelistR)
+    # imgStroSave(inputPath, outputPath, xylist, filelistL, filelistR)
+    imgStroSaveGR(inputPath, outputPath, xylist, filelistL, filelistR)
 
 def paths_sorted(paths):
     return sorted(paths, key = lambda x: int(x.name))
@@ -96,7 +99,7 @@ def readFilelist(path):
 
 
 def teachXY(inputPath, filelistL, filelistR):
-  files = filelistL
+  files = copy.copy(filelistL)
   # OpenCV
   cv2.namedWindow('JETRACER_TRAINE_VIEW', cv2.WINDOW_NORMAL)
   cv2.setMouseCallback('JETRACER_TRAINE_VIEW', mouse_callback)
@@ -202,150 +205,42 @@ def mouse_callback(event, x, y, flags, param):
   mouse_pos = (x, y)
   mouse_event = event
 
-def imgConvert(inpath, outpath, xylist, listL, listR):
+
+
+def imgStroSave(inpath, outpath, xylist, listL, listR):
   filenum = len(listL)
   for i in range(filenum):
     str_uuid = str(uuid.uuid1())
     imageLColor = cv2.imread(str(inpath / listL[i]) , cv2.IMREAD_COLOR)
     imageRColor = cv2.imread(str(inpath / listR[i]) , cv2.IMREAD_COLOR)
     imageSteroColor = cv2.addWeighted(src1 = imageLColor , alpha=0.5, src2 = imageRColor, beta = 0.5, gamma = 0)
-       
     imageLGray = cv2.cvtColor(imageLColor, cv2.COLOR_BGR2GRAY)
     imageRGray = cv2.cvtColor(imageRColor, cv2.COLOR_BGR2GRAY)
     imageSteroGray = cv2.addWeighted(src1 = imageLGray, alpha=0.5, src2 = imageRGray, beta = 0.5, gamma = 0)
     outPathStr = str(outpath / ('%d_%d_%s.jpg' % (xylist[i][0],  xylist[i][1], str_uuid)))
     cv2.imwrite(outPathStr, imageSteroColor)
 
+def imgStroSaveGR(inpath, outpath, xylist, listL, listR):
+  filenum = len(listL)
+  for i in range(filenum):
+    str_uuid = str(uuid.uuid1())
+    imageLColor = cv2.imread(str(inpath / listL[i]) , cv2.IMREAD_COLOR)
+    imageRColor = cv2.imread(str(inpath / listR[i]) , cv2.IMREAD_COLOR)
+    height, width, _ = imageLColor.shape[:3]
+    zeros = np.zeros((height, width), imageLColor.dtype)
 
+    _, imgL_green, _ =cv2.split(imageLColor)
+    _, _, imgR_red =cv2.split(imageRColor)
 
+    imggrL = cv2.merge((zeros, imgL_green, zeros))
+    imgrdR = cv2.merge((zeros, zeros, imgR_red))
 
+    imageSteroGR = cv2.addWeighted(src1 = imggrL, alpha=0.5, src2 = imgrdR, beta = 0.5, gamma = 0)
+    outPathStr = str(outpath / ('%d_%d_%s.jpg' % (xylist[i][0],  xylist[i][1], str_uuid)))
+    cv2.imwrite(outPathStr, imageSteroGR)
 
+       
 
-def execute_nkd():
-  global mouse_pos
-  global mouse_event
-
-
-  # Folder search
-  files = glob.glob('data/apex/*')
-  files_num = len(files)
-
-  # dict
-  file_dict = dict()
-  for f in files:
-    pos = re.findall(r'\d+', f)    
-    file_dict[f] = (int(pos[0]), int(pos[1]))
-
-  # OpenCV
-  cv2.namedWindow('JETRACER_TRAINE_VIEW', cv2.WINDOW_NORMAL)
-  cv2.setMouseCallback('JETRACER_TRAINE_VIEW', mouse_callback)
-
-  disp_count = 0
-  disp_image = cv2.imread(files[disp_count], cv2.IMREAD_COLOR)
-  #disp_image = cv2.addWeighted(src1 = imgL, alpha=0.5, src2 = imgR, beta = 0.5, gamma = 0)
-  disp_pos = file_dict[files[0]]
-  lblatch = 0
-  delflg = False
-
-  # Loop
-  # while not rospy.is_shutdown():
-  while True:
-
-    # key function
-    key = cv2.waitKey(30)    
-    # "1"key
-    if key == nextkeycode: # NEXT: ->
-      disp_count = disp_count + 1
-      delflg = False
-    # "2" key
-    if key == backkeycode: # PREV: <- 
-      disp_count = disp_count -1
-      delflg = False
-    if key == quitkeycode:
-      return 
-    if key == delkeycode:
-      delflg = True
-
-
-    if disp_count < 0:
-      disp_count = 0
-    if disp_count >= files_num:
-      break
-
-    # "1" key or "2" key 画像リロード
-    if key == nextkeycode or key == backkeycode:
-      # 次 or 前のdisp_countを表示
-      disp_image = cv2.imread(files[disp_count], cv2.IMREAD_COLOR)
-      #imgL = cv2.imread(filesL[disp_count], cv2.IMREAD_COLOR)
-      # disp_image = cv2.addWeighted(src1 = imgL, alpha=0.5, src2 = imgR, beta = 0.5, gamma = 0)
-      disp_pos = file_dict[files[disp_count]]
-
-
-
-
-
-    # ESCでbreak
-    if key == 27:
-      break
-    if mouse_event == cv2.EVENT_LBUTTONDOWN and not delflg:
-      disp_pos = mouse_pos
-      file_dict[files[disp_count]] = mouse_pos
-    if delflg:
-      disp_pos = (0, 0)
-      file_dict[files[disp_count]] = disp_pos
-
-
-    # display art
-    temp = disp_image.copy()
-    if delflg:
-      # ばってんを描写
-      cv2.line(temp, (0, 0), (temp.shape[1], temp.shape[0]),
-                (0, 0, 255), thickness=5, lineType=cv2.LINE_8)
-      cv2.line(temp, (temp.shape[1], 0), (0, temp.shape[0]),
-                (0, 0, 255), thickness=5, lineType=cv2.LINE_8)
-      cv2.putText(temp, "PREV: 1 <- Del -> 2 :NEXT", 
-                  (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
-                  0.6, (255, 255, 255), 2)
-      cv2.putText(temp, files[disp_count],
-                  (10, temp.shape[0]-10), cv2.FONT_HERSHEY_SIMPLEX,
-                  0.6, (255, 255, 255), 2)
-      cv2.imshow('JETRACER_TRAINE_VIEW', temp)
-    else: 
-      # マウスポインタの場所に十字を描写
-      cv2.line(temp, (mouse_pos[0], 0), (mouse_pos[0], temp.shape[0]),
-                (255, 0, 0), thickness=2, lineType=cv2.LINE_8)
-      cv2.line(temp, (0, mouse_pos[1]), (temp.shape[1], mouse_pos[1]),
-                (255, 0, 0), thickness=2, lineType=cv2.LINE_8)
-      # 中央の十字 
-      cv2.line(temp, (0, int(temp.shape[1] / 2)), (temp.shape[0], int(temp.shape[1] / 2)),
-                (127, 127, 127), thickness=1, lineType=cv2.LINE_8)
-      cv2.line(temp, (int(temp.shape[0] / 2), 0), (int(temp.shape[0] / 2), temp.shape[1]),
-                (127, 127, 127), thickness=1, lineType=cv2.LINE_8)
-
-      cv2.circle(temp, (int(temp.shape[0] / 2), int(temp.shape[1] / 2)), int(temp.shape[1] / 2), (127, 127, 127), thickness=1)
-      cv2.circle(temp, (int(temp.shape[0] / 2), int(temp.shape[1] / 2)), int(temp.shape[1] / 4), (127, 127, 127), thickness=1)
-
-      # 決定した教示座標
-      cv2.circle(temp, disp_pos, 5, (0, 255, 0), thickness=3)
-      cv2.putText(temp, "PREV: 1 <- Del -> 2 :NEXT", 
-                  (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
-                  0.6, (255, 255, 255), 2)
-      cv2.putText(temp, files[disp_count],
-                  (10, temp.shape[0]-10), cv2.FONT_HERSHEY_SIMPLEX,
-                  0.6, (255, 255, 255), 2)
-
-      cv2.imshow('JETRACER_TRAINE_VIEW', temp)
-  # rename
-  for f in file_dict:
-    pos = file_dict[f]
-    if pos[0]  == 0 and pos[1] == 0:
-      print("del:" + f)
-      os.remove(f) 
-    else:
-      f_new = re.sub(r'-?[0-9]_-?[0-9]_', 
-              '{}_{}_'.format(pos[0], pos[1]), f)
-      print(f_new)            
-      os.rename(f, f_new)
 
 if __name__ == '__main__':
 
