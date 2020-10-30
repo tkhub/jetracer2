@@ -3,6 +3,7 @@
 
 #import rospy
 
+import time
 import torch
 import torchvision
 
@@ -70,8 +71,9 @@ def execute():
   # Training: 準備したデータローダで学習開始
   model.train()
 
-  epoch_count = 30
-
+  epoch_count = 50
+  sum_loss_hys = [100.0] * 5
+  beforetime = time.time()
   while epoch_count > 0:
 
     sum_loss = 0.0
@@ -115,9 +117,29 @@ def execute():
       print(text, end="")
 
     print(" SumLoss: {}".format(sum_loss))
+    for i in range(len(sum_loss_hys) -1):
+      sum_loss_hys[i + 1] = sum_loss_hys[i]
+    sum_loss_hys[0] = sum_loss
+    sum_loss_hys_diff = []
+    if len(sum_loss_hys) < epoch_count:
+      for i in range(len(sum_loss_hys) - 1):
+        sum_loss_hys_diff.append(sum_loss_hys[i + 1] - sum_loss_hys[i]/sum_loss_hys[i])
+      
+      cnclFlg = False
+      for i in range(3):
+        if sum_loss_hys_diff[i] < 0.1:
+          cnclFlg = True
+        else:
+          cnclFlg = False
+      
+      if cnclFlg:
+        print("sumLoss is convergence")
+        break
 
     epoch_count = epoch_count - 1
 
+  aftertime = time.time()
+  print("time = " +str(aftertime - beforetime))
   # モデルを保存する
   torch.save(model.state_dict(), 'data/model.pth')
   model = model.eval()
